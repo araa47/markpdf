@@ -11,6 +11,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import (
+    CondPageBreak,
     HRFlowable,
     Image,
     KeepTogether,
@@ -114,6 +115,7 @@ def create_styles(theme: dict[str, str | None]) -> dict:
                 spaceBefore=hd["sb"],
                 leading=hd["ld"],
                 fontName="Helvetica-Bold",
+                keepWithNext=True,
             )
         )
 
@@ -298,22 +300,33 @@ def build_story(
             ):
                 level = int(btype[1])
                 text = _fmt(content, theme)
-                story.append(
-                    Paragraph(text, styles[f"Heading{level}Custom"])
+                # Avoid orphaned headings: break page if insufficient space
+                story.append(CondPageBreak(1.2 * inch))
+                heading_para = Paragraph(
+                    text, styles[f"Heading{level}Custom"]
                 )
                 if level == 2:
-                    story.append(Spacer(1, 2))
                     story.append(
-                        HRFlowable(
-                            width="100%",
-                            thickness=0.5,
-                            color=colors.HexColor(theme["border"]),
-                            spaceBefore=0,
-                            spaceAfter=8,
+                        KeepTogether(
+                            [
+                                heading_para,
+                                Spacer(1, 2),
+                                HRFlowable(
+                                    width="100%",
+                                    thickness=0.5,
+                                    color=colors.HexColor(
+                                        theme["border"]
+                                    ),
+                                    spaceBefore=0,
+                                    spaceAfter=8,
+                                ),
+                            ]
                         )
                     )
                 else:
-                    story.append(Spacer(1, 4))
+                    story.append(
+                        KeepTogether([heading_para, Spacer(1, 4)])
+                    )
 
             elif btype == BLOCK_PARA:
                 story.append(
