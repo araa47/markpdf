@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 from PIL import Image as PILImage
 from reportlab.lib import colors
@@ -41,7 +41,16 @@ from .parser import (
     BLOCK_TABLE,
 )
 
-HEADING_DEFS = [
+
+class _HeadingDef(TypedDict):
+    size: int
+    tk: str
+    sb: int
+    sa: int
+    ld: int
+
+
+HEADING_DEFS: list[_HeadingDef] = [
     {"size": 30, "tk": "h1", "sb": 20, "sa": 6, "ld": 36},
     {"size": 22, "tk": "h2", "sb": 24, "sa": 4, "ld": 28},
     {"size": 17, "tk": "h3", "sb": 18, "sa": 4, "ld": 23},
@@ -81,9 +90,7 @@ def process_inline_formatting(text: str, theme: dict[str, str | None]) -> str:
     text = re.sub(r"___(.+?)___", r"<b><i>\1</i></b>", text)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
     text = re.sub(r"__(.+?)__", r"<b>\1</b>", text)
-    text = re.sub(
-        r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<i>\1</i>", text
-    )
+    text = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<i>\1</i>", text)
     text = re.sub(r"(?<!_)_(?!_)(.+?)(?<!_)_(?!_)", r"<i>\1</i>", text)
     text = re.sub(
         r"\[([^\]]+)\]\(([^)]+)\)",
@@ -231,9 +238,7 @@ def resolve_image(
     return None
 
 
-def load_image_flowable(
-    path: str, max_w: float, max_h: float
-) -> Image | None:
+def load_image_flowable(path: str, max_w: float, max_h: float) -> Image | None:
     try:
         pil = PILImage.open(path)
         iw, ih = pil.size
@@ -302,9 +307,7 @@ def build_story(
                 text = _fmt(content, theme)
                 # Avoid orphaned headings: break page if insufficient space
                 story.append(CondPageBreak(1.2 * inch))
-                heading_para = Paragraph(
-                    text, styles[f"Heading{level}Custom"]
-                )
+                heading_para = Paragraph(text, styles[f"Heading{level}Custom"])
                 if level == 2:
                     story.append(
                         KeepTogether(
@@ -314,9 +317,7 @@ def build_story(
                                 HRFlowable(
                                     width="100%",
                                     thickness=0.5,
-                                    color=colors.HexColor(
-                                        theme["border"]
-                                    ),
+                                    color=colors.HexColor(theme["border"]),
                                     spaceBefore=0,
                                     spaceAfter=8,
                                 ),
@@ -324,14 +325,10 @@ def build_story(
                         )
                     )
                 else:
-                    story.append(
-                        KeepTogether([heading_para, Spacer(1, 4)])
-                    )
+                    story.append(KeepTogether([heading_para, Spacer(1, 4)]))
 
             elif btype == BLOCK_PARA:
-                story.append(
-                    Paragraph(_fmt(content, theme), styles["Normal"])
-                )
+                story.append(Paragraph(_fmt(content, theme), styles["Normal"]))
                 story.append(Spacer(1, 4))
 
             elif btype == BLOCK_CODE:
@@ -362,14 +359,10 @@ def build_story(
                 headers = content.get("headers", [])
                 rows = content.get("rows", [])
                 h_p = [
-                    Paragraph(_fmt(h, theme), styles["TableHeader"])
-                    for h in headers
+                    Paragraph(_fmt(h, theme), styles["TableHeader"]) for h in headers
                 ]
                 r_p = [
-                    [
-                        Paragraph(_fmt(c, theme), styles["TableCell"])
-                        for c in r
-                    ]
+                    [Paragraph(_fmt(c, theme), styles["TableCell"]) for c in r]
                     for r in rows
                 ]
                 nc = len(headers)
@@ -436,9 +429,7 @@ def build_story(
 
             elif btype == BLOCK_BULLET_LIST:
                 items = [
-                    ListItem(
-                        Paragraph(_fmt(t, theme), styles["ListItem"])
-                    )
+                    ListItem(Paragraph(_fmt(t, theme), styles["ListItem"]))
                     for t in content
                 ]
                 story.append(
@@ -457,9 +448,7 @@ def build_story(
 
             elif btype == BLOCK_NUMBER_LIST:
                 items = [
-                    ListItem(
-                        Paragraph(_fmt(t, theme), styles["ListItem"])
-                    )
+                    ListItem(Paragraph(_fmt(t, theme), styles["ListItem"]))
                     for t in content
                 ]
                 story.append(
@@ -467,9 +456,7 @@ def build_story(
                         items,
                         bulletType="1",
                         bulletFontSize=10,
-                        bulletColor=colors.HexColor(
-                            theme["muted_foreground"]
-                        ),
+                        bulletColor=colors.HexColor(theme["muted_foreground"]),
                         leftIndent=18,
                         spaceBefore=4,
                         spaceAfter=4,
@@ -479,12 +466,8 @@ def build_story(
 
             elif btype == BLOCK_QUOTE:
                 formatted = _fmt(content, theme)
-                para = Paragraph(
-                    f"<i>{formatted}</i>", styles["BlockQuote"]
-                )
-                tbl = Table(
-                    [["", para]], colWidths=[3, None], hAlign="LEFT"
-                )
+                para = Paragraph(f"<i>{formatted}</i>", styles["BlockQuote"])
+                tbl = Table([["", para]], colWidths=[3, None], hAlign="LEFT")
                 tbl.setStyle(
                     TableStyle(
                         [
@@ -518,9 +501,7 @@ def build_story(
                 alt = content.get("alt", "")
                 resolved = resolve_image(src, md_path, remote_cache)
                 if resolved:
-                    flowable = load_image_flowable(
-                        resolved, avail_w, avail_h
-                    )
+                    flowable = load_image_flowable(resolved, avail_w, avail_h)
                     if flowable:
                         elems: list = [flowable]
                         if alt:

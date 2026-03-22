@@ -80,9 +80,7 @@ def parse_markdown(content: str, verbose: bool = False) -> list[tuple[str, Any]]
             while i < len(lines) and not lines[i].strip().startswith("```"):
                 code_lines.append(lines[i])
                 i += 1
-            blocks.append(
-                (BLOCK_CODE, {"lang": lang, "code": "\n".join(code_lines)})
-            )
+            blocks.append((BLOCK_CODE, {"lang": lang, "code": "\n".join(code_lines)}))
             if verbose:
                 print(f"  [Code] {len(code_lines)} lines ({lang or 'plain'})")
             i += 1
@@ -91,16 +89,12 @@ def parse_markdown(content: str, verbose: bool = False) -> list[tuple[str, Any]]
         if "|" in stripped and stripped.startswith("|"):
             table_lines = [line]
             i += 1
-            while (
-                i < len(lines) and "|" in lines[i].strip() and lines[i].strip()
-            ):
+            while i < len(lines) and "|" in lines[i].strip() and lines[i].strip():
                 table_lines.append(lines[i])
                 i += 1
             if len(table_lines) >= 2:
                 headers, rows = parse_table(table_lines)
-                blocks.append(
-                    (BLOCK_TABLE, {"headers": headers, "rows": rows})
-                )
+                blocks.append((BLOCK_TABLE, {"headers": headers, "rows": rows}))
             continue
 
         if stripped.startswith(">"):
@@ -116,9 +110,7 @@ def parse_markdown(content: str, verbose: bool = False) -> list[tuple[str, Any]]
             while i < len(lines):
                 item_line = lines[i].strip()
                 if re.match(r"^[-*+]\s", item_line):
-                    task_match = re.match(
-                        r"^[-*+]\s+\[([ xX])\]\s*(.*)$", item_line
-                    )
+                    task_match = re.match(r"^[-*+]\s+\[([ xX])\]\s*(.*)$", item_line)
                     if task_match:
                         checked = task_match.group(1).lower() == "x"
                         prefix = "\u2611 " if checked else "\u2610 "
