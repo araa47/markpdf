@@ -10,7 +10,7 @@ import aiofiles
 import aiohttp
 import typer
 
-from .parser import BLOCK_IMAGE, HEADER_BLOCKS, parse_markdown
+from .parser import BLOCK_IMAGE, parse_markdown
 from .renderer import build_story, create_styles, group_sections, render_pdf
 from .themes import THEME_DARK, THEME_LIGHT
 
@@ -23,13 +23,9 @@ app = typer.Typer(
 )
 
 
-async def fetch_remote_image(
-    url: str, session: aiohttp.ClientSession
-) -> str | None:
+async def fetch_remote_image(url: str, session: aiohttp.ClientSession) -> str | None:
     try:
-        async with session.get(
-            url, timeout=aiohttp.ClientTimeout(total=15)
-        ) as resp:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
             if resp.status != 200:
                 return None
             data = await resp.read()
@@ -57,9 +53,7 @@ async def prefetch_images(
         return {}
 
     if verbose:
-        print(
-            f"  Fetching {len(remote_urls)} remote image(s) concurrently..."
-        )
+        print(f"  Fetching {len(remote_urls)} remote image(s) concurrently...")
 
     resolved: dict[str, str | None] = {}
     async with aiohttp.ClientSession() as session:
@@ -110,9 +104,7 @@ async def convert(
 
     remote_cache = await prefetch_images(blocks, verbose)
     styles = create_styles(theme)
-    story = build_story(
-        blocks, styles, theme, md_path, remote_cache, verbose
-    )
+    story = build_story(blocks, styles, theme, md_path, remote_cache, verbose)
 
     if keep_together:
         story = group_sections(story)
