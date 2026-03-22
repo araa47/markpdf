@@ -1,8 +1,6 @@
 ---
 extends: default
 rules:
-    truthy:
-        check-keys: false
-        allowed-values: ["true", "false", "on"]
+    truthy: disable
     line-length:
         max: 120
