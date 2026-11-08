@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- **Drop Python 3.10 support** (`requires-python >=3.11`). Pillow 13.0.0 fixes 41 known vulnerabilities (5 critical) but requires Python 3.11+, so the lockfile's Python 3.10 fork was stuck on the vulnerable Pillow 12.3.0. Python 3.10 reached end of life in October 2026.
 - Refresh dependencies (lockfile, pre-commit hooks, GitHub Actions) and drop the `pytest-asyncio<0.23` pin.
 - Narrow workflow token permissions to `contents: read` (removed unused `id-token: write`).
 
