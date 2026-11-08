@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Refresh dependencies (lockfile, pre-commit hooks, GitHub Actions) and drop the `pytest-asyncio<0.23` pin.
+- Narrow workflow token permissions to `contents: read` (removed unused `id-token: write`).
+
 ## [0.2.0] - 2026-03-23
 
 ### Fixed
